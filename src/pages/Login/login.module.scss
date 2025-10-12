@@ -1,0 +1,25 @@
+@use "../../assets/styles/variables";
+
+.mainContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+
+  .container {
+    display: flex;
+    align-items: center;
+    width: 960px;
+    height: 560px;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.25);
+
+    .login {
+      width: 50%;
+    }
+
+    .cloud {
+      width: 50%;
+    }
+  }
+}
