@@ -1,5 +1,3 @@
-@use "../../assets/styles/variables";
-
 .mainContainer {
   display: flex;
   justify-content: center;
@@ -13,13 +11,59 @@
     width: 960px;
     height: 560px;
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.25);
+    border-radius: 16px;
 
     .login {
       width: 50%;
+      padding-left: 60px;
+      padding-right: 60px;
+      height: 100%;
+      margin-top: 102px;
+      display: flex;
+      flex-direction: column;
+
+      .loginText {
+        font-weight: 700;
+        font-size: 25.63px;
+      }
     }
 
-    .cloud {
-      width: 50%;
+    .clouds {
+      min-width: 50%;
+      max-width: 50%;
+      background-color: #d3e1e7;
+      height: 100%;
+      overflow: hidden;
+      border-top-right-radius: 16px;
+      border-bottom-right-radius: 16px;
+      position: relative;
+
+      .topCloud {
+        position: absolute;
+        top: 45px;
+        right: 56px;
+        filter: drop-shadow(-13px 51px 25px rgba(18, 6, 67, 0.45));
+      }
+
+      .midCloud {
+        position: absolute;
+        left: 25px;
+        top: 162px;
+        filter: drop-shadow(-13px 51px 25px rgba(18, 6, 67, 0.45));
+      }
+
+      .bottomCloud {
+        position: absolute;
+        bottom: 60px;
+        right: 45px;
+        filter: drop-shadow(-13px 51px 25px rgba(18, 6, 67, 0.45));
+      }
+
+      .cloud {
+        max-width: 198px;
+        width: 100%;
+        height: auto;
+      }
     }
   }
 }
