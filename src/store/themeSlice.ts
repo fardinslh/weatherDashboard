@@ -7,7 +7,21 @@ type ThemeState = {
   mode: ThemeMode;
 };
 
-const initialMode = (localStorage.getItem(themeKey) as ThemeMode) ?? "light";
+const getStoredMode = (): ThemeMode => {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+  const stored = window.localStorage.getItem(themeKey) as ThemeMode | null;
+  return stored === "light" || stored === "dark" ? stored : "light";
+};
+
+const saveMode = (mode: ThemeMode) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(themeKey, mode);
+  }
+};
+
+const initialMode = getStoredMode();
 
 const initialState: ThemeState = {
   mode: initialMode,
@@ -19,11 +33,12 @@ const themeSlice = createSlice({
   reducers: {
     toggleTheme: (state) => {
       state.mode = state.mode === "light" ? "dark" : "light";
+      saveMode(state.mode);
     },
 
     setTheme: (state, action: PayloadAction<ThemeMode>) => {
       state.mode = action.payload;
-      localStorage.setItem(themeKey, action.payload);
+      saveMode(action.payload);
     },
   },
 });

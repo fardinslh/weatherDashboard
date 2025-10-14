@@ -1,5 +1,7 @@
 {
   "login": "Login",
   "enterName": "Enter Your Name",
-  "language": "Language"
+  "language": "Language",
+  "nameRequired": "Your name is required.",
+  "nameMinLength": "Name must be at least 2 characters."
 }

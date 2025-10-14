@@ -9,7 +9,7 @@ function getTheme(mode: "light" | "dark") {
       fontFamily: "'Roboto', sans-serif",
     },
     shape: {
-      borderRadius: 8,
+      borderRadius: 4,
     },
   });
 }

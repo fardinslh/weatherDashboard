@@ -11,6 +11,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import getTheme from "./theme";
 import { Provider, useSelector } from "react-redux";
 import { store } from "./store";
@@ -34,6 +35,7 @@ export function ThemeWrapper() {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <RouterProvider router={router} />
     </ThemeProvider>
   );
