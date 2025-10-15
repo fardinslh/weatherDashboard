@@ -13,6 +13,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import WeatherIcon from "src/components/icons/Weather";
+import type { DailyForecast, MonthlyPoint } from "src/types/DashboardPage";
+import TodayOverviewCard from "../../components/Dashboard/TodayOverviewCard";
 
 type GeocodeResult = {
   name: string;
@@ -30,6 +32,7 @@ type CurrentWeather = {
 };
 
 const FORECAST_DAYS = 14;
+const DEGREE_SYMBOL = String.fromCharCode(176);
 
 const formatDate = (
   value: string | number | Date,
@@ -42,7 +45,7 @@ const formatDate = (
   return new Intl.DateTimeFormat("en-US", options).format(date);
 };
 
-const formatTemperature = (temperature: number | null | undefined) => {
+const formatTemperatureValue = (temperature: number | null | undefined) => {
   if (
     temperature === null ||
     temperature === undefined ||
@@ -51,7 +54,16 @@ const formatTemperature = (temperature: number | null | undefined) => {
     return "N/A";
   }
 
-  return `${Math.round(temperature)} deg C`;
+  return `${Math.round(temperature)}`;
+};
+
+const formatTemperatureWithUnit = (temperature: number | null | undefined) => {
+  const value = formatTemperatureValue(temperature);
+  if (value === "N/A") {
+    return value;
+  }
+
+  return `${value} ${DEGREE_SYMBOL} C`;
 };
 
 const describeWeatherCode = (code: number | null | undefined) => {
@@ -103,6 +115,7 @@ export default function Dashboard() {
   const [monthlySeries, setMonthlySeries] = useState<MonthlyPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const theme = useTheme();
 
   const handleSearch = async () => {
@@ -280,26 +293,27 @@ export default function Dashboard() {
     }
 
     return {
+      dayName: formatDate(currentWeather.timestamp, { weekday: "long" }),
       date: formatDate(currentWeather.timestamp, {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
       }),
       time: formatDate(currentWeather.timestamp, {
         hour: "numeric",
         minute: "2-digit",
       }),
       description: currentWeather.description,
-      temperature: formatTemperature(currentWeather.temperature),
-      feelsLike: formatTemperature(currentWeather.feelsLike),
+      temperature: formatTemperatureWithUnit(currentWeather.temperature),
+      feelsLike: formatTemperatureValue(currentWeather.feelsLike),
     };
   }, [currentWeather]);
 
   const todayForecast = forecastDays[0];
   const todayHighLow = todayForecast
     ? {
-        high: formatTemperature(todayForecast.max),
-        low: formatTemperature(todayForecast.min),
+        high: formatTemperatureValue(todayForecast.max),
+        low: formatTemperatureValue(todayForecast.min),
       }
     : null;
 
@@ -350,7 +364,7 @@ export default function Dashboard() {
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", gap: "20px" }}>
+        <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
           <TextField
             label="Search Your Location"
             placeholder=""
@@ -363,7 +377,12 @@ export default function Dashboard() {
               }
             }}
             disabled={isLoading}
-            sx={{}}
+            sx={{
+              borderColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.neutral[600]
+                  : theme.palette.neutral[300],
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -383,24 +402,25 @@ export default function Dashboard() {
             }}
           />
           <IconButton
+            aria-label="open settings"
             sx={{
-              border: `1px solid ${
-                theme.palette.mode === "dark"
-                  ? theme.palette.neutral[600]
-                  : theme.palette.neutral[300]
-              }`,
-              backgroundColor: theme.palette.background.default,
-              borderRadius: "8px",
-              width: 44,
-              height: 44,
+              border: `1px solid #d3e2f5`,
+              backgroundColor: "white",
+              borderRadius: "12px",
+              width: 46,
+              height: 46,
+              boxShadow: "0 6px 14px rgba(97, 127, 167, 0.12)",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#E8F3FF",
+                borderColor: "#6FB3FF",
+              },
             }}
           >
             <SettingsIcon
               sx={{
-                color:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.neutral[600]
-                    : theme.palette.neutral[300],
+                color: "#7d92ab",
+                transition: "color 0.2s ease-in-out",
               }}
             />
           </IconButton>
@@ -409,7 +429,23 @@ export default function Dashboard() {
 
       {error && <Alert severity="error">{error}</Alert>}
 
-      {/* bottom */}
+      <Box
+        sx={{
+          width: "100%",
+          mx: "auto",
+          px: { xs: 2, md: 4 },
+          py: { xs: 3, md: 4 },
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+        }}
+      >
+        <TodayOverviewCard
+          locationLabel={locationLabel}
+          overview={todaysDetails}
+          highLow={todayHighLow}
+        />
+      </Box>
     </Box>
   );
 }
