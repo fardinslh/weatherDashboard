@@ -11,10 +11,10 @@ import {
   useTheme,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import SettingsIcon from "@mui/icons-material/Settings";
 import WeatherIcon from "src/components/icons/Weather";
 import type { DailyForecast, MonthlyPoint } from "src/types/DashboardPage";
-import TodayOverviewCard from "../../components/Dashboard/TodayOverviewCard";
+import TodayOverviewCard from "src/components/Dashboard/TodayOverviewCard";
+import DashboardSettingsMenu from "src/components/Dashboard/SettingsMenu";
 
 type GeocodeResult = {
   name: string;
@@ -115,7 +115,6 @@ export default function Dashboard() {
   const [monthlySeries, setMonthlySeries] = useState<MonthlyPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const theme = useTheme();
 
   const handleSearch = async () => {
@@ -383,47 +382,27 @@ export default function Dashboard() {
                   ? theme.palette.neutral[600]
                   : theme.palette.neutral[300],
             }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="search location"
-                    onClick={handleSearch}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <CircularProgress size={18} />
-                    ) : (
-                      <SearchIcon color="action" />
-                    )}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <IconButton
-            aria-label="open settings"
-            sx={{
-              border: `1px solid #d3e2f5`,
-              backgroundColor: "white",
-              borderRadius: "12px",
-              width: 46,
-              height: 46,
-              boxShadow: "0 6px 14px rgba(97, 127, 167, 0.12)",
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                backgroundColor: "#E8F3FF",
-                borderColor: "#6FB3FF",
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="search location"
+                      onClick={handleSearch}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <CircularProgress size={18} />
+                      ) : (
+                        <SearchIcon color="action" />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               },
             }}
-          >
-            <SettingsIcon
-              sx={{
-                color: "#7d92ab",
-                transition: "color 0.2s ease-in-out",
-              }}
-            />
-          </IconButton>
+          />
+          <DashboardSettingsMenu />
         </Box>
       </Box>
 
