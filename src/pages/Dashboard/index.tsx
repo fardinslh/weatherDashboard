@@ -3,16 +3,16 @@ import axios from "axios";
 import {
   Alert,
   Box,
-  Card,
   CircularProgress,
-  Container,
   IconButton,
   InputAdornment,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
+import WeatherIcon from "src/components/icons/Weather";
 
 type GeocodeResult = {
   name: string;
@@ -27,20 +27,6 @@ type CurrentWeather = {
   temperature: number;
   feelsLike: number;
   description: string;
-};
-
-type DailyForecast = {
-  time: string;
-  mean: number | null;
-  min: number | null;
-  max: number | null;
-  description: string;
-};
-
-type MonthlyPoint = {
-  label: string;
-  temperature: number;
-  timestamp: number;
 };
 
 const FORECAST_DAYS = 14;
@@ -117,6 +103,7 @@ export default function Dashboard() {
   const [monthlySeries, setMonthlySeries] = useState<MonthlyPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
@@ -215,7 +202,18 @@ export default function Dashboard() {
           description: describeWeatherCode(daily.weather_code?.[index]),
         }));
 
-        setForecastDays(dailyData.slice(-FORECAST_DAYS));
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const upcoming = dailyData
+          .filter((entry) => new Date(entry.time) >= today)
+          .slice(0, FORECAST_DAYS);
+
+        setForecastDays(
+          upcoming.length === FORECAST_DAYS
+            ? upcoming
+            : dailyData.slice(-FORECAST_DAYS),
+        );
 
         const buckets = new Map<
           string,
@@ -248,7 +246,7 @@ export default function Dashboard() {
             timestamp: Date.parse(bucket.sample),
           }))
           .sort((a, b) => a.timestamp - b.timestamp)
-          .slice(-6);
+          .slice(-12);
 
         setMonthlySeries(monthlyPoints);
       } else {
@@ -284,8 +282,10 @@ export default function Dashboard() {
     return {
       date: formatDate(currentWeather.timestamp, {
         weekday: "long",
-        month: "short",
+        month: "long",
         day: "numeric",
+      }),
+      time: formatDate(currentWeather.timestamp, {
         hour: "numeric",
         minute: "2-digit",
       }),
@@ -295,5 +295,121 @@ export default function Dashboard() {
     };
   }, [currentWeather]);
 
-  return <div>dashboard</div>;
+  const todayForecast = forecastDays[0];
+  const todayHighLow = todayForecast
+    ? {
+        high: formatTemperature(todayForecast.max),
+        low: formatTemperature(todayForecast.min),
+      }
+    : null;
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: theme.palette.background.default,
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          gap: 2,
+          px: "24px",
+          py: "16px",
+          boxShadow: "0px 4px 10px 0px rgba(166, 165, 165, 0.15)",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box
+            sx={{
+              maxWidth: 56,
+              maxHeight: 56,
+            }}
+          >
+            <WeatherIcon />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              fontWeight={400}
+              letterSpacing={0.15}
+            >
+              Weather Dashboard
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ display: "flex", gap: "20px" }}>
+          <TextField
+            label="Search Your Location"
+            placeholder=""
+            size="small"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleSearch();
+              }
+            }}
+            disabled={isLoading}
+            sx={{}}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="search location"
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <CircularProgress size={18} />
+                    ) : (
+                      <SearchIcon color="action" />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <IconButton
+            sx={{
+              border: `1px solid ${
+                theme.palette.mode === "dark"
+                  ? theme.palette.neutral[600]
+                  : theme.palette.neutral[300]
+              }`,
+              backgroundColor: theme.palette.background.default,
+              borderRadius: "8px",
+              width: 44,
+              height: 44,
+            }}
+          >
+            <SettingsIcon
+              sx={{
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.neutral[600]
+                    : theme.palette.neutral[300],
+              }}
+            />
+          </IconButton>
+        </Box>
+      </Box>
+
+      {error && <Alert severity="error">{error}</Alert>}
+
+      {/* bottom */}
+    </Box>
+  );
 }
