@@ -1,10 +1,8 @@
-import { StrictMode, useMemo } from "react";
+import { StrictMode, Suspense, lazy, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { dashboardRoute, loginRoute } from "./constants/routes.ts";
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Navigate, createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -18,13 +16,31 @@ import { store } from "./store";
 import type { RootState } from "./store";
 import "./i18n";
 
+const Login = lazy(() => import("./pages/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { path: loginRoute, element: <Login /> },
-      { path: dashboardRoute, element: <Dashboard /> },
+      { index: true, element: <Navigate to={loginRoute} replace /> },
+      {
+        path: loginRoute,
+        element: (
+          <Suspense fallback={null}>
+            <Login />
+          </Suspense>
+        ),
+      },
+      {
+        path: dashboardRoute,
+        element: (
+          <Suspense fallback={null}>
+            <Dashboard />
+          </Suspense>
+        ),
+      },
     ],
   },
 ]);

@@ -9,4 +9,14 @@ export default defineConfig({
       src: path.resolve(__dirname, "src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          echarts: ["echarts", "echarts-for-react"],
+        },
+      },
+    },
+  },
 });
+

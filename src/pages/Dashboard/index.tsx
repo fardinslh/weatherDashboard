@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Suspense, lazy, useMemo, useState } from "react";
 import axios from "axios";
 import {
   Alert,
@@ -16,8 +16,13 @@ import { useTranslation } from "react-i18next";
 import type { DailyForecast, MonthlyPoint } from "src/types/DashboardPage";
 import DashboardSettingsMenu from "src/components/Dashboard/SettingsMenu";
 import TodayOverviewCard from "src/components/Dashboard/TodayOverviewCard";
-import MonthlyTemperatureChart from "src/components/Dashboard/MonthlyTemperatureChart";
-import ForecastScroller from "src/components/Dashboard/ForecastScroller";
+
+const MonthlyTemperatureChart = lazy(
+  () => import("src/components/Dashboard/MonthlyTemperatureChart"),
+);
+const ForecastScroller = lazy(
+  () => import("src/components/Dashboard/ForecastScroller"),
+);
 import DashboardFooter from "src/components/Dashboard/DashboardFooter";
 import i18n from "i18next";
 
@@ -453,17 +458,21 @@ export default function Dashboard() {
             overview={todaysDetails}
             highLow={todayHighLow}
           />
-          <MonthlyTemperatureChart series={monthlySeries} />
+          <Suspense fallback={null}>
+            <MonthlyTemperatureChart series={monthlySeries} />
+          </Suspense>
         </Box>
 
-        <Box
-          sx={{
-            px: "24px",
-            mt: "-2px",
-          }}
-        >
-          <ForecastScroller days={forecastDays} />
-        </Box>
+        <Suspense fallback={null}>
+          <Box
+            sx={{
+              px: "24px",
+              mt: "-2px",
+            }}
+          >
+            <ForecastScroller days={forecastDays} />
+          </Box>
+        </Suspense>
 
         <Box sx={{ mt: "auto" }}>
           <DashboardFooter />
