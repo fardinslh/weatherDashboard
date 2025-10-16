@@ -34,8 +34,8 @@ function TodayOverviewCard({
     <Card
       sx={{
         borderRadius: "28px",
-        px: { xs: 3, md: 4.5 },
-        py: { xs: 3, md: 4 },
+        px: "24px",
+        py: "20px",
         bgcolor: theme.palette.neutral[200],
         boxShadow: "0px 20px 45px rgba(79, 114, 150, 0.18)",
         display: "flex",
@@ -44,6 +44,9 @@ function TodayOverviewCard({
         alignItems: { xs: "flex-start", md: "center" },
         gap: { xs: 3, md: 7 },
         minHeight: 220,
+        maxWidth: { lg: "40%" },
+        flex: 1,
+        height: "234px",
       }}
     >
       {overview ? (
@@ -57,21 +60,28 @@ function TodayOverviewCard({
           >
             <Box
               sx={{
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
                 gap: 1,
                 px: 2,
                 py: 0.6,
                 borderRadius: "999px",
-                backgroundColor: "#D0DCE8",
+                backgroundColor: "#CDD9E0",
                 boxShadow: "inset 0 1px 2px rgba(255, 255, 255, 0.65)",
+                justifyContent: "space-between",
+                width: "max-content",
               }}
             >
-              <PlaceOutlinedIcon sx={{ fontSize: 16, color: "#2B4862" }} />
+              <PlaceOutlinedIcon
+                sx={{
+                  fontSize: 16,
+                  color: "#2B4862",
+                }}
+              />
               <Typography
                 variant="body2"
                 fontWeight={400}
-                sx={{ color: theme.palette.primary[900], letterSpacing: 0.1 }}
+                sx={{ color: "#3D4852", letterSpacing: 0.1 }}
               >
                 {locationLabel}
               </Typography>
@@ -79,11 +89,11 @@ function TodayOverviewCard({
 
             <Box>
               <Typography
-                fontWeight={600}
+                fontWeight={500}
                 sx={{
                   color: theme.palette.primary[900],
-                  fontSize: { xs: "1.75rem", md: "2.05rem" },
-                  lineHeight: 1.1,
+                  fontSize: "32px",
+                  lineHeight: "100%",
                 }}
               >
                 {overview.dayName}
@@ -92,20 +102,18 @@ function TodayOverviewCard({
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 2.5,
-                  color: "#3F5F7F",
-                  mt: 1,
+                  gap: "20px",
+                  color: theme.palette.primary[900],
+                  mt: "4px",
                 }}
               >
                 <Typography
-                  variant="body2"
-                  sx={{ fontWeight: 500, letterSpacing: 0.1 }}
+                  sx={{ fontWeight: 400, letterSpacing: 0, fontSize: "14px" }}
                 >
                   {overview.date}
                 </Typography>
                 <Typography
-                  variant="body2"
-                  sx={{ fontWeight: 500, letterSpacing: 0.1 }}
+                  sx={{ fontWeight: 400, letterSpacing: 0, fontSize: "14px" }}
                 >
                   {overview.time}
                 </Typography>
@@ -114,11 +122,10 @@ function TodayOverviewCard({
 
             <Box>
               <Typography
-                variant="h2"
-                fontWeight={700}
+                fontWeight={500}
                 sx={{
                   color: theme.palette.primary[900],
-                  fontSize: { xs: "2.6rem", md: "3.2rem" },
+                  fontSize: "40px",
                   lineHeight: 1.1,
                 }}
               >
@@ -128,7 +135,7 @@ function TodayOverviewCard({
                 variant="body2"
                 sx={{
                   mt: 0.75,
-                  color: "#3F5F7F",
+                  color: theme.palette.primary[900],
                   fontWeight: 500,
                   letterSpacing: 0.1,
                 }}
@@ -145,23 +152,24 @@ function TodayOverviewCard({
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
-              gap: 1.5,
+              gap: "8px",
               width: { xs: "100%", md: 180 },
               "& svg": {
                 width: { xs: 130, md: 160 },
                 height: "auto",
+                maxHeight: "115px",
               },
             }}
           >
             {icon}
             <Typography
-              variant="h4"
-              fontWeight={600}
+              fontWeight={400}
               sx={{
                 color: theme.palette.primary[900],
-                textAlign: "center",
-                fontSize: { xs: "1.5rem", md: "1.75rem" },
+                textAlign: "left",
+                fontSize: "28px",
                 lineHeight: 1.2,
+                width: "100%",
               }}
             >
               {overview.description}
@@ -169,10 +177,12 @@ function TodayOverviewCard({
             <Typography
               variant="body2"
               sx={{
-                color: "#3F5F7F",
-                fontWeight: 500,
-                textAlign: "center",
-                letterSpacing: 0.1,
+                color: theme.palette.primary[900],
+                fontWeight: 400,
+                textAlign: "left",
+                letterSpacing: 0,
+                fontSize: "16px",
+                width: "100%",
               }}
             >
               Feels Like {overview.feelsLike}

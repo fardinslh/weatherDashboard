@@ -13,8 +13,9 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import WeatherIcon from "src/components/icons/Weather";
 import type { DailyForecast, MonthlyPoint } from "src/types/DashboardPage";
-import TodayOverviewCard from "src/components/Dashboard/TodayOverviewCard";
 import DashboardSettingsMenu from "src/components/Dashboard/SettingsMenu";
+import TodayOverviewCard from "src/components/Dashboard/TodayOverviewCard";
+import MonthlyTemperatureChart from "src/components/Dashboard/MonthlyTemperatureChart";
 
 type GeocodeResult = {
   name: string;
@@ -127,6 +128,7 @@ export default function Dashboard() {
     setError(null);
 
     try {
+      // 1️⃣ Geocode lookup
       const geocodeResponse = await axios.get<{
         results?: Array<{
           id: number;
@@ -146,7 +148,6 @@ export default function Dashboard() {
       });
 
       const [geoMatch] = geocodeResponse.data.results ?? [];
-
       if (!geoMatch) {
         setError(
           "Location not found. Try a city and country code, e.g. London,GB.",
@@ -164,7 +165,8 @@ export default function Dashboard() {
 
       setLocation(normalizedLocation);
 
-      const weatherResponse = await axios.get<{
+      // 2️⃣ Forecast API for current + 14-day forecast
+      const forecastResponse = await axios.get<{
         current?: {
           time: string;
           temperature_2m: number;
@@ -186,13 +188,12 @@ export default function Dashboard() {
           daily:
             "temperature_2m_mean,temperature_2m_min,temperature_2m_max,weather_code",
           timezone: "auto",
-          forecast_days: 16,
-          past_days: 90,
+          forecast_days: FORECAST_DAYS,
         },
       });
 
-      const current = weatherResponse.data.current;
-      const daily = weatherResponse.data.daily;
+      const current = forecastResponse.data.current;
+      const dailyForecast = forecastResponse.data.daily;
 
       if (current) {
         setCurrentWeather({
@@ -201,52 +202,68 @@ export default function Dashboard() {
           feelsLike: current.apparent_temperature,
           description: describeWeatherCode(current.weather_code),
         });
-      } else {
-        setCurrentWeather(null);
       }
 
-      if (daily) {
-        const dailyData: DailyForecast[] = daily.time.map((time, index) => ({
-          time,
-          mean: daily.temperature_2m_mean?.[index] ?? null,
-          min: daily.temperature_2m_min?.[index] ?? null,
-          max: daily.temperature_2m_max?.[index] ?? null,
-          description: describeWeatherCode(daily.weather_code?.[index]),
-        }));
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const upcoming = dailyData
-          .filter((entry) => new Date(entry.time) >= today)
-          .slice(0, FORECAST_DAYS);
-
-        setForecastDays(
-          upcoming.length === FORECAST_DAYS
-            ? upcoming
-            : dailyData.slice(-FORECAST_DAYS),
+      if (dailyForecast) {
+        const forecastData: DailyForecast[] = dailyForecast.time.map(
+          (time, index) => ({
+            time,
+            mean: dailyForecast.temperature_2m_mean?.[index] ?? null,
+            min: dailyForecast.temperature_2m_min?.[index] ?? null,
+            max: dailyForecast.temperature_2m_max?.[index] ?? null,
+            description: describeWeatherCode(
+              dailyForecast.weather_code?.[index],
+            ),
+          }),
         );
+        setForecastDays(forecastData);
+      }
 
+      // 3️⃣ Archive API for last 12 months historical data
+      const end = new Date();
+      const start = new Date();
+      start.setFullYear(end.getFullYear() - 1);
+      const formatISO = (d: Date) => d.toISOString().split("T")[0];
+
+      const archiveResponse = await axios.get<{
+        daily?: {
+          time: string[];
+          temperature_2m_mean: Array<number | null>;
+          weather_code: Array<number | null>;
+        };
+      }>("https://archive-api.open-meteo.com/v1/archive", {
+        params: {
+          latitude: normalizedLocation.lat,
+          longitude: normalizedLocation.lon,
+          daily: "temperature_2m_mean,weather_code",
+          timezone: "auto",
+          start_date: formatISO(start),
+          end_date: formatISO(end),
+        },
+      });
+
+      const dailyArchive = archiveResponse.data.daily;
+
+      if (dailyArchive) {
         const buckets = new Map<
           string,
           { sum: number; count: number; label: string; sample: string }
         >();
 
-        dailyData.forEach((entry) => {
-          const date = new Date(entry.time);
+        dailyArchive.time.forEach((time, index) => {
+          const temp = dailyArchive.temperature_2m_mean?.[index];
+          const date = new Date(time);
           const key = `${date.getFullYear()}-${date.getMonth()}`;
           const label = formatDate(date, { month: "short", year: "numeric" });
 
           if (!buckets.has(key)) {
-            buckets.set(key, { sum: 0, count: 0, label, sample: entry.time });
+            buckets.set(key, { sum: 0, count: 0, label, sample: time });
           }
 
           const bucket = buckets.get(key);
-          if (!bucket || entry.mean === null || Number.isNaN(entry.mean)) {
-            return;
-          }
+          if (!bucket || temp === null || Number.isNaN(temp)) return;
 
-          bucket.sum += entry.mean;
+          bucket.sum += temp;
           bucket.count += 1;
         });
 
@@ -257,12 +274,10 @@ export default function Dashboard() {
             temperature: bucket.sum / bucket.count,
             timestamp: Date.parse(bucket.sample),
           }))
-          .sort((a, b) => a.timestamp - b.timestamp)
-          .slice(-12);
+          .sort((a, b) => a.timestamp - b.timestamp);
 
         setMonthlySeries(monthlyPoints);
       } else {
-        setForecastDays([]);
         setMonthlySeries([]);
       }
     } catch {
@@ -277,13 +292,7 @@ export default function Dashboard() {
       return "Weather Dashboard";
     }
 
-    const parts = [location.name];
-    if (location.state) {
-      parts.push(location.state);
-    }
-    parts.push(location.country);
-
-    return parts.filter(Boolean).join(", ");
+    return location.name;
   }, [location]);
 
   const todaysDetails = useMemo(() => {
@@ -415,8 +424,8 @@ export default function Dashboard() {
           px: { xs: 2, md: 4 },
           py: { xs: 3, md: 4 },
           display: "flex",
-          flexDirection: "column",
-          gap: 4,
+          flexDirection: { xs: "column", lg: "row" },
+          gap: "41px",
         }}
       >
         <TodayOverviewCard
@@ -424,6 +433,7 @@ export default function Dashboard() {
           overview={todaysDetails}
           highLow={todayHighLow}
         />
+        <MonthlyTemperatureChart series={monthlySeries} />
       </Box>
     </Box>
   );
