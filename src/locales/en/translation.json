@@ -1,7 +1,87 @@
 {
-  "login": "Login",
-  "enterName": "Enter Your Name",
-  "language": "Language",
-  "nameRequired": "Your name is required.",
-  "nameMinLength": "Name must be at least 2 characters."
+  "auth": {
+    "title": "Login",
+    "enterName": "Enter Your Name",
+    "language": "Language",
+    "nameRequired": "Your name is required.",
+    "nameMinLength": "Name must be at least 2 characters.",
+    "submit": "Login",
+    "languageOptions": {
+      "en": "English",
+      "fa": "Persian"
+    }
+  },
+  "dashboard": {
+    "title": "Weather Dashboard",
+    "searchLabel": "Search Your Location",
+    "searchPlaceholder": "Search your location",
+    "ariaSearchButton": "search location",
+    "errors": {
+      "emptySearch": "Please enter a location.",
+      "locationNotFound": "Location not found. Try a city and country code, e.g. London,GB.",
+      "loadFailed": "Unable to load weather data right now. Please try again."
+    }
+  },
+  "settings": {
+    "mode": "Mode",
+    "light": "Light",
+    "dark": "Dark",
+    "language": "Language",
+    "openAria": "open settings",
+    "englishShort": "En",
+    "persianShort": "Fa",
+    "exit": "Exit"
+  },
+  "todayCard": {
+    "highLow": "High: {{high}} Low: {{low}}",
+    "feelsLike": "Feels Like {{value}}",
+    "empty": "Search for a city to see the current conditions."
+  },
+  "forecast": {
+    "title": "2 weeks Forecast"
+  },
+  "chart": {
+    "title": "Average Monthly Temperature",
+    "noData": "Waiting for monthly data..."
+  },
+  "footer": {
+    "rights": "All rights of this site are reserved for Nadin Sadr Aria Engineering Company.",
+    "contact": "contact us : {{email}}"
+  },
+  "common": {
+    "today": "Today",
+    "notAvailable": "N/A",
+    "temperatureWithUnit": "{{value}} °C"
+  },
+  "weatherCodes": {
+    "0": "Clear sky",
+    "1": "Mainly clear",
+    "2": "Partly cloudy",
+    "3": "Overcast",
+    "45": "Fog",
+    "48": "Depositing rime fog",
+    "51": "Light drizzle",
+    "53": "Moderate drizzle",
+    "55": "Dense drizzle",
+    "56": "Light freezing drizzle",
+    "57": "Dense freezing drizzle",
+    "61": "Slight rain",
+    "63": "Moderate rain",
+    "65": "Heavy rain",
+    "66": "Light freezing rain",
+    "67": "Heavy freezing rain",
+    "71": "Slight snow",
+    "73": "Moderate snow",
+    "75": "Heavy snow",
+    "77": "Snow grains",
+    "80": "Slight rain showers",
+    "81": "Moderate rain showers",
+    "82": "Violent rain showers",
+    "85": "Slight snow showers",
+    "86": "Heavy snow showers",
+    "95": "Thunderstorm",
+    "96": "Thunderstorm with slight hail",
+    "99": "Thunderstorm with heavy hail",
+    "unknown": "Unknown conditions"
+  }
 }

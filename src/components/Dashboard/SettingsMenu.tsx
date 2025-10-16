@@ -23,7 +23,7 @@ import { loginRoute } from "src/constants/routes";
 const DashboardSettingsMenu = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const mode = useSelector((state: RootState) => state.theme.mode);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [activeLanguage, setActiveLanguage] = useState<"en" | "fa">(
@@ -69,11 +69,11 @@ const DashboardSettingsMenu = () => {
   return (
     <>
       <IconButton
-        aria-label="open settings"
+        aria-label={t("settings.openAria")}
         onClick={handleOpen}
         sx={{
           border: `1px solid ${isOpen ? "#6FB3FF" : "#d3e2f5"}`,
-          backgroundColor: isOpen ? "#E8F3FF" : "white",
+          backgroundColor: isOpen ? "#D9D9D9" : "transparent",
           borderRadius: "12px",
           width: 46,
           height: 46,
@@ -82,14 +82,14 @@ const DashboardSettingsMenu = () => {
             : "0 6px 14px rgba(97, 127, 167, 0.12)",
           transition: "all 0.2s ease-in-out",
           "&:hover": {
-            backgroundColor: "#E8F3FF",
+            backgroundColor: "#D9D9D9",
             borderColor: "#6FB3FF",
           },
         }}
       >
         <SettingsIcon
           sx={{
-            color: isOpen ? "#1C6DD0" : "#7d92ab",
+            color: isOpen ? "#1C6DD0" : "#BBC1C4",
             transition: "color 0.2s ease-in-out",
           }}
         />
@@ -126,7 +126,7 @@ const DashboardSettingsMenu = () => {
               variant="subtitle2"
               sx={{ fontWeight: 600, color: "#2B3F57", letterSpacing: 0.2 }}
             >
-              Mode
+              {t("settings.mode")}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -157,7 +157,7 @@ const DashboardSettingsMenu = () => {
                 }}
               >
                 <LightModeOutlinedIcon sx={{ fontSize: 18 }} />
-                Light
+                {t("settings.light")}
               </ToggleButton>
               <ToggleButton
                 value="dark"
@@ -176,7 +176,7 @@ const DashboardSettingsMenu = () => {
                 }}
               >
                 <DarkModeOutlinedIcon sx={{ fontSize: 18 }} />
-                Dark
+                {t("settings.dark")}
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
@@ -188,7 +188,7 @@ const DashboardSettingsMenu = () => {
               variant="subtitle2"
               sx={{ fontWeight: 600, color: "#2B3F57", letterSpacing: 0.2 }}
             >
-              Language
+              {t("settings.language")}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -216,7 +216,7 @@ const DashboardSettingsMenu = () => {
                   "&:hover": { backgroundColor: "#EFF7FF" },
                 }}
               >
-                En
+                {t("settings.englishShort")}
               </ToggleButton>
               <ToggleButton
                 value="fa"
@@ -232,7 +232,7 @@ const DashboardSettingsMenu = () => {
                   "&:hover": { backgroundColor: "#EFF7FF" },
                 }}
               >
-                Fa
+                {t("settings.persianShort")}
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
@@ -250,7 +250,7 @@ const DashboardSettingsMenu = () => {
               "&:hover": { backgroundColor: "rgba(29, 93, 170, 0.08)" },
             }}
           >
-            Exit
+            {t("settings.exit")}
           </Button>
         </Box>
       </Popover>

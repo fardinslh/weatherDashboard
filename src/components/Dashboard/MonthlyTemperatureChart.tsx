@@ -5,6 +5,7 @@ import type { EChartsOption } from "echarts";
 import type { CallbackDataParams } from "echarts/types/dist/shared";
 import type { MonthlyPoint } from "src/types/DashboardPage";
 import ReactEChartsCore from "echarts-for-react";
+import { useTranslation } from "react-i18next";
 
 type MonthlyTemperatureChartProps = {
   series: MonthlyPoint[];
@@ -14,15 +15,15 @@ type TooltipParam = CallbackDataParams & {
   axisValue?: string | number;
 };
 
-const DEGREE = String.fromCharCode(176);
-
-const buildMonthLabel = (label: string) => {
-  const [month] = label.split(" ");
-  return month;
+const buildMonthLabel = (timestamp: number, locale: string) => {
+  return new Intl.DateTimeFormat(locale, { month: "short" }).format(
+    new Date(timestamp),
+  );
 };
 
 const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
   const theme = useTheme();
+  const { t, i18n } = useTranslation();
   const chartRef = useRef<ReactEChartsCore>(null);
 
   const prepared = useMemo(() => {
@@ -36,7 +37,9 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
     }
 
     const values = series.map((item) => Number(item.temperature ?? 0));
-    const labels = series.map((item) => buildMonthLabel(item.label));
+    const labels = series.map((item) =>
+      buildMonthLabel(item.timestamp, i18n.language),
+    );
 
     const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
@@ -50,7 +53,7 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
       min: minAnchor,
       max: maxAnchor,
     };
-  }, [series]);
+  }, [series, i18n.language]);
 
   const chartOptions: EChartsOption = useMemo(() => {
     const colors = ["#27C6F7", "#6F5BFF"];
@@ -93,7 +96,8 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
               : theme.palette.text.primary,
           fontWeight: 600,
           fontSize: 12,
-          formatter: (value: number) => `${value}${DEGREE}C`,
+          formatter: (value: number) =>
+            t("common.temperatureWithUnit", { value }),
         },
         splitLine: {
           show: true,
@@ -124,8 +128,10 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
             (typeof first.name === "string" ? first.name : "");
           const numericValue = Number(first.value);
           const formattedValue = Number.isFinite(numericValue)
-            ? `${Math.round(numericValue)}${DEGREE}C`
-            : "N/A";
+            ? t("common.temperatureWithUnit", {
+                value: Math.round(numericValue),
+              })
+            : t("common.notAvailable");
 
           return `${label}<br/>${formattedValue}`;
         },
@@ -171,14 +177,14 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
         },
       ],
     };
-  }, [prepared]);
+  }, [prepared, theme.palette.mode, t, i18n.language]);
 
   useEffect(() => {
     const chart = chartRef.current?.getEchartsInstance();
     if (chart) {
       chart.dispose();
     }
-  }, [theme.palette.mode]);
+  }, [theme.palette.mode, i18n.language]);
 
   return (
     <Card
@@ -205,13 +211,13 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
           fontSize: "18px",
         }}
       >
-        Average Monthly Temprature
+        {t("chart.title")}
       </Typography>
 
       <Box sx={{ height: "234px" }}>
         {prepared.data.length ? (
           <ReactECharts
-            key={theme.palette.mode}
+            key={`${theme.palette.mode}-${i18n.language}`}
             option={chartOptions}
             style={{ width: "100%", height: "100%" }}
             opts={{ renderer: "canvas" }}
@@ -228,7 +234,7 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
               fontSize: 14,
             }}
           >
-            Waiting for monthly data...
+            {t("chart.noData")}
           </Box>
         )}
       </Box>

@@ -1,11 +1,11 @@
-import { Button, TextField, Box, useTheme, MenuItem } from "@mui/material";
+import { useState } from "react";
+import { Box, Button, CircularProgress, MenuItem, TextField, useTheme } from "@mui/material";
+import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import moonCloudFast from "src/assets/moonCloudFast.png";
 import moonCloudMid from "src/assets/moonCloudMid.png";
 import sunCloudAngled from "src/assets/sunCloudAngled.png";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
-import { useState } from "react";
 
 type LoginFormValues = {
   name: string;
@@ -14,9 +14,9 @@ type LoginFormValues = {
 const defaultValues: LoginFormValues = { name: "" };
 
 function Login(): React.ReactNode {
-  const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -26,230 +26,180 @@ function Login(): React.ReactNode {
   } = useForm<LoginFormValues>({ defaultValues });
 
   const onSubmit = async (values: LoginFormValues) => {
-    setLoading(true);
     if (!values.name.trim()) {
       return;
     }
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 1200);
-    });
-
+    setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     navigate("/dashboard");
   };
+
+  const languageValue = i18n.language.startsWith("fa") ? "fa" : "en";
 
   return (
     <Box
       sx={{
+        minHeight: "100vh",
+        width: "100vw",
         display: "flex",
         flexDirection: "column",
-        gap: "40px",
-        justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
-        width: "100vw",
+        justifyContent: "center",
+        gap: 4,
         backgroundColor: theme.palette.background.default,
+        p: 3,
       }}
     >
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          width: "960px",
-          height: "560px",
-          boxShadow: "0px 4px 8px 0px rgba(0, 0, 0, 0.25)",
-          borderRadius: "16px",
+          width: { xs: "100%", md: 960 },
+          height: { xs: "auto", md: 560 },
+          flexDirection: { xs: "column", md: "row" },
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.25)",
+          borderRadius: 2,
           backgroundColor: theme.palette.background.paper,
+          overflow: "hidden",
         }}
       >
         <Box
-          sx={{
-            width: "50%",
-            paddingLeft: "60px",
-            paddingRight: "60px",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            backgroundColor: "",
-          }}
           component="form"
           onSubmit={handleSubmit(onSubmit)}
+          sx={{
+            width: { xs: "100%", md: "50%" },
+            p: { xs: 4, md: "60px" },
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+          }}
         >
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
+              fontWeight: 700,
+              fontSize: "26px",
+              textAlign: "center",
+              color: theme.palette.text.primary,
+              mt: { xs: 2, md: "42px" },
             }}
           >
-            <Box
-              sx={{
-                fontWeight: 700,
-                fontSize: "25.63px",
-                textAlign: "center",
-                marginBottom: "32px",
-                marginTop: "102px",
-                color: theme.palette.text.primary,
-              }}
-            >
-              {t("login")}
-            </Box>
-            <Controller
-              name="name"
-              control={control}
-              rules={{
-                required: t("nameRequired"),
-                minLength: {
-                  value: 2,
-                  message: t("nameMinLength"),
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  placeholder={t("enterName")}
-                  fullWidth
-                  variant="outlined"
-                  size="medium"
-                  error={Boolean(errors.name)}
-                  helperText={errors.name?.message}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      color: theme.palette.text.primary,
-                      "& fieldset": {
-                        borderColor:
-                          theme.palette.mode === "dark"
-                            ? theme.palette.neutral[600]
-                            : theme.palette.neutral[300],
-                      },
-                      "&:hover fieldset": {
-                        borderColor: theme.palette.primary.main,
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: theme.palette.primary.main,
-                      },
-                    },
-                    "& .MuiInputBase-input::placeholder": {
-                      color: theme.palette.text.secondary,
-                      opacity: 0.7,
-                    },
-                  }}
-                />
-              )}
-            />
+            {t("auth.title")}
           </Box>
-          <Box
+
+          <Controller
+            name="name"
+            control={control}
+            rules={{
+              required: t("auth.nameRequired"),
+              minLength: { value: 2, message: t("auth.nameMinLength") },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                placeholder={t("auth.enterName")}
+                fullWidth
+                variant="outlined"
+                size="medium"
+                error={Boolean(errors.name)}
+                helperText={errors.name?.message}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    color: theme.palette.text.primary,
+                    "& fieldset": {
+                      borderColor:
+                        theme.palette.mode === "dark"
+                          ? theme.palette.neutral[600]
+                          : theme.palette.neutral[300],
+                    },
+                    "&:hover fieldset": {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                }}
+              />
+            )}
+          />
+
+          <Button
+            type="submit"
+            disabled={loading || isSubmitting}
+            variant="contained"
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "102px",
+              backgroundColor: theme.palette.info.main,
+              color: "#FFFFFF",
+              textTransform: "uppercase",
+              fontSize: "16px",
+              fontWeight: 500,
+              py: 1.5,
+              "&:hover": { backgroundColor: theme.palette.info.dark },
+              "&:disabled": {
+                backgroundColor: theme.palette.grey[300],
+              },
             }}
           >
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={isSubmitting}
-              loading={loading}
-              sx={{
-                backgroundColor: theme.palette.info.main,
-                color: "#FFFFFF",
-                "&:hover": {
-                  backgroundColor: theme.palette.info.dark,
-                },
-                textTransform: "uppercase",
-                fontSize: "16px",
-                fontWeight: 500,
-                padding: "10px 24px",
-                width: "100%",
-                "&:disabled": {
-                  backgroundColor: theme.palette.grey[300],
-                },
-              }}
-            >
-              {t("login")}
-            </Button>
-          </Box>
+            {loading || isSubmitting ? (
+              <CircularProgress size={20} sx={{ color: "#FFFFFF" }} />
+            ) : (
+              t("auth.submit")
+            )}
+          </Button>
         </Box>
+
         <Box
           sx={{
-            minWidth: "50%",
-            maxWidth: "50%",
+            width: { xs: "100%", md: "50%" },
             backgroundColor: theme.palette.extra.accent1,
-            height: "100%",
-            overflow: "hidden",
-            borderTopRightRadius: "16px",
-            borderBottomRightRadius: "16px",
             position: "relative",
+            minHeight: { xs: 260, md: "100%" },
           }}
         >
           <Box
             sx={{
               position: "absolute",
-              top: "45px",
-              right: "56px",
+              top: { xs: 24, md: 45 },
+              right: { xs: 24, md: 56 },
               filter: "drop-shadow(-13px 51px 25px rgba(18, 6, 67, 0.45))",
             }}
           >
-            <img
-              src={moonCloudMid}
-              alt="cloud"
-              style={{
-                maxWidth: "198px",
-                width: "100%",
-                height: "auto",
-              }}
-            />
+            <img src={moonCloudMid} alt="cloud" style={{ width: 198 }} />
           </Box>
           <Box
             sx={{
               position: "absolute",
-              left: "25px",
-              top: "162px",
+              left: { xs: 20, md: 25 },
+              top: { xs: 120, md: 162 },
               filter: "drop-shadow(-13px 51px 25px rgba(18, 6, 67, 0.45))",
             }}
           >
-            <img
-              src={sunCloudAngled}
-              alt="cloud"
-              style={{
-                maxWidth: "198px",
-                width: "100%",
-                height: "auto",
-              }}
-            />
+            <img src={sunCloudAngled} alt="cloud" style={{ width: 198 }} />
           </Box>
           <Box
             sx={{
               position: "absolute",
-              bottom: "60px",
-              right: "45px",
+              bottom: { xs: 24, md: 60 },
+              right: { xs: 24, md: 45 },
               filter: "drop-shadow(-13px 51px 25px rgba(18, 6, 67, 0.45))",
             }}
           >
-            <img
-              src={moonCloudFast}
-              alt="cloud"
-              style={{
-                maxWidth: "198px",
-                width: "100%",
-                height: "auto",
-              }}
-            />
+            <img src={moonCloudFast} alt="cloud" style={{ width: 198 }} />
           </Box>
         </Box>
       </Box>
-      <Box
-        sx={{
-          width: "220px",
-        }}
-      >
+
+      <Box sx={{ width: 220 }}>
         <TextField
           select
           fullWidth
           variant="standard"
-          label={t("language")}
-          defaultValue="en"
+          label={t("auth.language")}
+          value={languageValue}
+          onChange={(event) => {
+            const value = event.target.value;
+            void i18n.changeLanguage(value);
+          }}
           slotProps={{
             inputLabel: {
               shrink: true,
@@ -275,8 +225,8 @@ function Login(): React.ReactNode {
             },
           }}
         >
-          <MenuItem value="en">English</MenuItem>
-          <MenuItem value="fa">فارسی</MenuItem>
+          <MenuItem value="en">{t("auth.languageOptions.en")}</MenuItem>
+          <MenuItem value="fa">{t("auth.languageOptions.fa")}</MenuItem>
         </TextField>
       </Box>
     </Box>
@@ -284,3 +234,7 @@ function Login(): React.ReactNode {
 }
 
 export default Login;
+
+
+
+

@@ -12,11 +12,14 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import WeatherIcon from "src/components/icons/Weather";
+import { useTranslation } from "react-i18next";
 import type { DailyForecast, MonthlyPoint } from "src/types/DashboardPage";
 import DashboardSettingsMenu from "src/components/Dashboard/SettingsMenu";
 import TodayOverviewCard from "src/components/Dashboard/TodayOverviewCard";
 import MonthlyTemperatureChart from "src/components/Dashboard/MonthlyTemperatureChart";
 import ForecastScroller from "src/components/Dashboard/ForecastScroller";
+import DashboardFooter from "src/components/Dashboard/DashboardFooter";
+import i18n from "i18next";
 
 type GeocodeResult = {
   name: string;
@@ -31,10 +34,10 @@ type CurrentWeather = {
   temperature: number;
   feelsLike: number;
   description: string;
+  code: number | null;
 };
 
 const FORECAST_DAYS = 14;
-const DEGREE_SYMBOL = String.fromCharCode(176);
 
 const formatDate = (
   value: string | number | Date,
@@ -44,7 +47,7 @@ const formatDate = (
     value instanceof Date
       ? value
       : new Date(typeof value === "number" ? value : Date.parse(value));
-  return new Intl.DateTimeFormat("en-US", options).format(date);
+  return new Intl.DateTimeFormat(i18n.language, options).format(date);
 };
 
 const formatTemperatureValue = (temperature: number | null | undefined) => {
@@ -53,7 +56,7 @@ const formatTemperatureValue = (temperature: number | null | undefined) => {
     temperature === undefined ||
     Number.isNaN(temperature)
   ) {
-    return "N/A";
+    return i18n.t("common.notAvailable");
   }
 
   return `${Math.round(temperature)}`;
@@ -61,50 +64,56 @@ const formatTemperatureValue = (temperature: number | null | undefined) => {
 
 const formatTemperatureWithUnit = (temperature: number | null | undefined) => {
   const value = formatTemperatureValue(temperature);
-  if (value === "N/A") {
+  if (value === i18n.t("common.notAvailable")) {
     return value;
   }
 
-  return `${value} ${DEGREE_SYMBOL} C`;
+  return i18n.t("common.temperatureWithUnit", { value });
 };
 
-const describeWeatherCode = (code: number | null | undefined) => {
+const describeWeatherCode = (code: number | null | undefined): string => {
   if (code === null || code === undefined) {
-    return "N/A";
+    return i18n.t("common.notAvailable");
   }
 
-  const mapping: Record<number, string> = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy",
-    3: "Overcast",
-    45: "Fog",
-    48: "Depositing rime fog",
-    51: "Light drizzle",
-    53: "Moderate drizzle",
-    55: "Dense drizzle",
-    56: "Light freezing drizzle",
-    57: "Dense freezing drizzle",
-    61: "Slight rain",
-    63: "Moderate rain",
-    65: "Heavy rain",
-    66: "Light freezing rain",
-    67: "Heavy freezing rain",
-    71: "Slight snow",
-    73: "Moderate snow",
-    75: "Heavy snow",
-    77: "Snow grains",
-    80: "Slight rain showers",
-    81: "Moderate rain showers",
-    82: "Violent rain showers",
-    85: "Slight snow showers",
-    86: "Heavy snow showers",
-    95: "Thunderstorm",
-    96: "Thunderstorm with slight hail",
-    99: "Thunderstorm with heavy hail",
-  };
+  const weatherCodeKeys = {
+    0: "weatherCodes.0",
+    1: "weatherCodes.1",
+    2: "weatherCodes.2",
+    3: "weatherCodes.3",
+    45: "weatherCodes.45",
+    48: "weatherCodes.48",
+    51: "weatherCodes.51",
+    53: "weatherCodes.53",
+    55: "weatherCodes.55",
+    56: "weatherCodes.56",
+    57: "weatherCodes.57",
+    61: "weatherCodes.61",
+    63: "weatherCodes.63",
+    65: "weatherCodes.65",
+    66: "weatherCodes.66",
+    67: "weatherCodes.67",
+    71: "weatherCodes.71",
+    73: "weatherCodes.73",
+    75: "weatherCodes.75",
+    77: "weatherCodes.77",
+    80: "weatherCodes.80",
+    81: "weatherCodes.81",
+    82: "weatherCodes.82",
+    85: "weatherCodes.85",
+    86: "weatherCodes.86",
+    95: "weatherCodes.95",
+    96: "weatherCodes.96",
+    99: "weatherCodes.99",
+  } as const;
 
-  return mapping[code] ?? "Unknown conditions";
+  type WeatherCodeKey = (typeof weatherCodeKeys)[keyof typeof weatherCodeKeys];
+
+  const key =
+    weatherCodeKeys[code as keyof typeof weatherCodeKeys] ??
+    "weatherCodes.unknown";
+
+  return i18n.t(key as WeatherCodeKey);
 };
 
 export default function Dashboard() {
@@ -118,10 +127,11 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
+  const { t, i18n: i18nInstance } = useTranslation();
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
-      setError("Please enter a location.");
+      setError(t("dashboard.errors.emptySearch"));
       return;
     }
 
@@ -129,7 +139,6 @@ export default function Dashboard() {
     setError(null);
 
     try {
-      // 1️⃣ Geocode lookup
       const geocodeResponse = await axios.get<{
         results?: Array<{
           id: number;
@@ -143,16 +152,14 @@ export default function Dashboard() {
         params: {
           name: searchTerm.trim(),
           count: 1,
-          language: "en",
+          language: i18nInstance.language.startsWith("fa") ? "fa" : "en",
           format: "json",
         },
       });
 
       const [geoMatch] = geocodeResponse.data.results ?? [];
       if (!geoMatch) {
-        setError(
-          "Location not found. Try a city and country code, e.g. London,GB.",
-        );
+        setError(t("dashboard.errors.locationNotFound"));
         return;
       }
 
@@ -166,7 +173,6 @@ export default function Dashboard() {
 
       setLocation(normalizedLocation);
 
-      // 2️⃣ Forecast API for current + 14-day forecast
       const forecastResponse = await axios.get<{
         current?: {
           time: string;
@@ -202,6 +208,7 @@ export default function Dashboard() {
           temperature: current.temperature_2m,
           feelsLike: current.apparent_temperature,
           description: describeWeatherCode(current.weather_code),
+          code: current.weather_code ?? null,
         });
       }
 
@@ -215,12 +222,12 @@ export default function Dashboard() {
             description: describeWeatherCode(
               dailyForecast.weather_code?.[index],
             ),
+            code: dailyForecast.weather_code?.[index] ?? null,
           }),
         );
         setForecastDays(forecastData);
       }
 
-      // 3️⃣ Archive API for last 12 months historical data
       const end = new Date();
       const start = new Date();
       start.setFullYear(end.getFullYear() - 1);
@@ -282,7 +289,7 @@ export default function Dashboard() {
         setMonthlySeries([]);
       }
     } catch {
-      setError("Unable to load weather data right now. Please try again.");
+      setError(t("dashboard.errors.loadFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -290,11 +297,11 @@ export default function Dashboard() {
 
   const locationLabel = useMemo(() => {
     if (!location) {
-      return "Weather Dashboard";
+      return t("dashboard.title");
     }
 
     return location.name;
-  }, [location]);
+  }, [location, t]);
 
   const todaysDetails = useMemo(() => {
     if (!currentWeather) {
@@ -312,11 +319,12 @@ export default function Dashboard() {
         hour: "numeric",
         minute: "2-digit",
       }),
-      description: currentWeather.description,
+      description: describeWeatherCode(currentWeather.code),
       temperature: formatTemperatureWithUnit(currentWeather.temperature),
       feelsLike: formatTemperatureValue(currentWeather.feelsLike),
+      code: currentWeather.code,
     };
-  }, [currentWeather]);
+  }, [currentWeather, i18nInstance.language, t]);
 
   const todayForecast = forecastDays[0];
   const todayHighLow = todayForecast
@@ -368,15 +376,15 @@ export default function Dashboard() {
               fontWeight={400}
               letterSpacing={0.15}
             >
-              Weather Dashboard
+              {t("dashboard.title")}
             </Typography>
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
           <TextField
-            label="Search Your Location"
-            placeholder=""
+            label={t("dashboard.searchLabel")}
+            placeholder={t("dashboard.searchPlaceholder")}
             size="small"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
@@ -393,11 +401,14 @@ export default function Dashboard() {
                   : theme.palette.neutral[300],
             }}
             slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
               input: {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      aria-label="search location"
+                      aria-label={t("dashboard.ariaSearchButton")}
                       onClick={handleSearch}
                       disabled={isLoading}
                     >
@@ -422,11 +433,11 @@ export default function Dashboard() {
         sx={{
           width: "100%",
           mx: "auto",
-          px: { xs: 2, md: 4 },
-          py: { xs: 3, md: 4 },
+          pt: "28px",
           display: "flex",
           flexDirection: "column",
           gap: 4,
+          flexGrow: 1,
         }}
       >
         <Box
@@ -434,7 +445,7 @@ export default function Dashboard() {
             display: "flex",
             flexDirection: { xs: "column", lg: "row" },
             gap: { xs: 3, lg: 4 },
-            alignItems: "stretch",
+            px: "24px",
           }}
         >
           <TodayOverviewCard
@@ -445,7 +456,18 @@ export default function Dashboard() {
           <MonthlyTemperatureChart series={monthlySeries} />
         </Box>
 
-        <ForecastScroller days={forecastDays} />
+        <Box
+          sx={{
+            px: "24px",
+            mt: "-2px",
+          }}
+        >
+          <ForecastScroller days={forecastDays} />
+        </Box>
+
+        <Box sx={{ mt: "auto" }}>
+          <DashboardFooter />
+        </Box>
       </Box>
     </Box>
   );

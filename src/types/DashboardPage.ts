@@ -10,4 +10,5 @@ export type DailyForecast = {
   min: number | null;
   max: number | null;
   description: string;
+  code?: number | null;
 };

@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Box, Card, Typography, useTheme } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { getWeatherIcon } from "./weatherIcons";
 import type { DailyForecast } from "src/types/DashboardPage";
 
@@ -7,28 +8,9 @@ type ForecastScrollerProps = {
   days: DailyForecast[];
 };
 
-const DEGREE = String.fromCharCode(176);
-
-const formatWeekday = (value: string, index: number) => {
-  if (index === 0) {
-    return "Today";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-  }).format(new Date(value));
-};
-
-const formatTemperature = (value: number | null) => {
-  if (value === null || Number.isNaN(value)) {
-    return "N/A";
-  }
-
-  return `${Math.round(value)}${DEGREE}C`;
-};
-
 const ForecastScroller = ({ days }: ForecastScrollerProps) => {
   const theme = useTheme();
+  const { t, i18n } = useTranslation();
 
   const items = useMemo(() => days.slice(0, 14), [days]);
 
@@ -75,7 +57,7 @@ const ForecastScroller = ({ days }: ForecastScrollerProps) => {
         px: { xs: 3, md: 4 },
         py: { xs: 3, md: 3.5 },
         backgroundColor: theme.palette.neutral[200],
-        boxShadow: "0px 4px 10px 4px rgba(0, 0, 0, 0.15)",
+        boxShadow: "0px 22px 48px rgba(62, 92, 132, 0.16)",
         width: "100%",
         display: "flex",
         flexDirection: "column",
@@ -86,11 +68,11 @@ const ForecastScroller = ({ days }: ForecastScrollerProps) => {
         sx={{
           fontWeight: 600,
           color: theme.palette.primary[900],
-          letterSpacing: 0,
+          letterSpacing: 0.2,
           fontSize: "24px",
         }}
       >
-        2 weeks Forecast
+        {t("forecast.title")}
       </Typography>
 
       <Box
@@ -112,8 +94,24 @@ const ForecastScroller = ({ days }: ForecastScrollerProps) => {
         onPointerLeave={stopDragging}
         onPointerCancel={stopDragging}
       >
-        {days.length > 0 ? (
-          items.map((day, index) => (
+        {items.map((day, index) => {
+          const dayLabel =
+            index === 0
+              ? t("common.today")
+              : new Intl.DateTimeFormat(i18n.language, {
+                  weekday: "short",
+                }).format(new Date(day.time));
+
+          const temperatureLabel =
+            day.mean === null && day.max === null && day.min === null
+              ? t("common.notAvailable")
+              : t("common.temperatureWithUnit", {
+                  value: Math.round(
+                    (day.mean ?? day.max ?? day.min ?? 0) as number,
+                  ),
+                });
+
+          return (
             <Box
               key={day.time}
               sx={{
@@ -131,37 +129,26 @@ const ForecastScroller = ({ days }: ForecastScrollerProps) => {
                 height: 266,
               }}
             >
-              <Box
+              <Typography
+                variant="subtitle2"
                 sx={{
-                  width: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "10px",
+                  fontWeight: 600,
+                  color: theme.palette.primary[900],
+                  textTransform: "capitalize",
                 }}
               >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 600,
-                    color: theme.palette.primary[900],
-                    textTransform: "capitalize",
-                    position: "relative",
-                  }}
-                >
-                  {formatWeekday(day.time, index)}
-                </Typography>
+                {dayLabel}
+              </Typography>
 
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: 3,
-                    borderRadius: 999,
-                    backgroundImage:
-                      "linear-gradient(90deg, rgba(54, 54, 54, 0) 0%, rgba(126, 126, 126, 1) 50%, rgba(54, 54, 54, 0) 100%)",
-                  }}
-                />
-              </Box>
+              <Box
+                sx={{
+                  width: "70%",
+                  height: 3,
+                  borderRadius: 999,
+                  backgroundImage:
+                    "linear-gradient(90deg, rgba(54, 54, 54, 0) 0%, rgba(126, 126, 126, 1) 50%, rgba(54, 54, 54, 0) 100%)",
+                }}
+              />
 
               <Box
                 sx={{
@@ -171,34 +158,22 @@ const ForecastScroller = ({ days }: ForecastScrollerProps) => {
                   color: theme.palette.text.primary,
                 }}
               >
-                {getWeatherIcon(day.description, 44)}
+                {getWeatherIcon(day.description, 44, day.code ?? null)}
               </Box>
               <Typography
                 variant="subtitle1"
                 sx={{
-                  fontWeight: 500,
+                  fontWeight: 700,
                   color: theme.palette.primary[900],
-                  letterSpacing: 0,
+                  letterSpacing: 0.2,
                   fontSize: "18px",
                 }}
               >
-                {formatTemperature(day.mean ?? day.max ?? day.min ?? null)}
+                {temperatureLabel}
               </Typography>
             </Box>
-          ))
-        ) : (
-          <Box
-            sx={{
-              alignItems: "center",
-              justifyContent: "center",
-              color: theme.palette.text.secondary,
-              fontWeight: 600,
-              fontSize: 14,
-            }}
-          >
-            Waiting for 2 weeks data...
-          </Box>
-        )}
+          );
+        })}
       </Box>
     </Card>
   );
