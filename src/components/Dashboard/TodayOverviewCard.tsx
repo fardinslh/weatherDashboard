@@ -37,7 +37,7 @@ function TodayOverviewCard({
         px: "24px",
         py: "20px",
         bgcolor: theme.palette.neutral[200],
-        boxShadow: "0px 20px 45px rgba(79, 114, 150, 0.18)",
+        boxShadow: "0px 4px 10px 4px rgba(0, 0, 0, 0.15)",
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         justifyContent: "space-between",

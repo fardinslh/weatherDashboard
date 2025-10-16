@@ -188,7 +188,7 @@ const MonthlyTemperatureChart = ({ series }: MonthlyTemperatureChartProps) => {
         pt: "16px",
         pb: "25px",
         backgroundColor: theme.palette.neutral[200],
-        boxShadow: "0px 22px 48px rgba(62, 92, 132, 0.16)",
+        boxShadow: "0px 4px 10px 4px rgba(0, 0, 0, 0.15)",
         width: { lg: "60%", xs: "100%" },
         minHeight: "234px",
         maxHeight: "234px",

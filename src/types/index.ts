@@ -10,3 +10,9 @@ declare module "i18next" {
 }
 
 export type ThemeMode = "light" | "dark";
+
+export type IconProps = {
+  width?: string;
+  height?: string;
+  color?: string;
+};

@@ -1,9 +1,8 @@
-import WbSunnyRoundedIcon from "@mui/icons-material/WbSunnyRounded";
-import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
-import OpacityOutlinedIcon from "@mui/icons-material/OpacityOutlined";
-import ThunderstormOutlinedIcon from "@mui/icons-material/ThunderstormOutlined";
 import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
-import GradingOutlinedIcon from "@mui/icons-material/GradingOutlined";
+import Sun from "src/components/icons/Sun";
+import Storm from "src/components/icons/Storm";
+import RainCloud from "src/components/icons/RainCloud";
+import SunCloud from "src/components/icons/SunCloud";
 
 export const getWeatherIcon = (
   description: string,
@@ -12,13 +11,11 @@ export const getWeatherIcon = (
   const normalized = description.toLowerCase();
 
   if (normalized.includes("clear")) {
-    return <WbSunnyRoundedIcon sx={{ fontSize: size, color: "#f7c948" }} />;
+    return <Sun />;
   }
 
   if (normalized.includes("thunder")) {
-    return (
-      <ThunderstormOutlinedIcon sx={{ fontSize: size, color: "#818cf8" }} />
-    );
+    return <Storm />;
   }
 
   if (
@@ -26,7 +23,7 @@ export const getWeatherIcon = (
     normalized.includes("drizzle") ||
     normalized.includes("shower")
   ) {
-    return <OpacityOutlinedIcon sx={{ fontSize: size, color: "#60a5fa" }} />;
+    return <RainCloud />;
   }
 
   if (normalized.includes("snow")) {
@@ -34,8 +31,8 @@ export const getWeatherIcon = (
   }
 
   if (normalized.includes("fog") || normalized.includes("mist")) {
-    return <GradingOutlinedIcon sx={{ fontSize: size, color: "#a5b4fc" }} />;
+    return <SunCloud />;
   }
 
-  return <CloudOutlinedIcon sx={{ fontSize: size, color: "#94a3b8" }} />;
+  return <SunCloud />;
 };

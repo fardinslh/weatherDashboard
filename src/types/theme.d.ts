@@ -16,6 +16,7 @@ declare module "@mui/material/styles" {
     };
     extra: {
       accent1: string;
+      accent2: string;
     };
   }
   interface PaletteOptions {
@@ -33,6 +34,7 @@ declare module "@mui/material/styles" {
     };
     extra?: {
       accent1: string;
+      accent2: string;
     };
   }
 }

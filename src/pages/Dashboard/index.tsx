@@ -16,6 +16,7 @@ import type { DailyForecast, MonthlyPoint } from "src/types/DashboardPage";
 import DashboardSettingsMenu from "src/components/Dashboard/SettingsMenu";
 import TodayOverviewCard from "src/components/Dashboard/TodayOverviewCard";
 import MonthlyTemperatureChart from "src/components/Dashboard/MonthlyTemperatureChart";
+import ForecastScroller from "src/components/Dashboard/ForecastScroller";
 
 type GeocodeResult = {
   name: string;
@@ -424,16 +425,27 @@ export default function Dashboard() {
           px: { xs: 2, md: 4 },
           py: { xs: 3, md: 4 },
           display: "flex",
-          flexDirection: { xs: "column", lg: "row" },
-          gap: "41px",
+          flexDirection: "column",
+          gap: 4,
         }}
       >
-        <TodayOverviewCard
-          locationLabel={locationLabel}
-          overview={todaysDetails}
-          highLow={todayHighLow}
-        />
-        <MonthlyTemperatureChart series={monthlySeries} />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", lg: "row" },
+            gap: { xs: 3, lg: 4 },
+            alignItems: "stretch",
+          }}
+        >
+          <TodayOverviewCard
+            locationLabel={locationLabel}
+            overview={todaysDetails}
+            highLow={todayHighLow}
+          />
+          <MonthlyTemperatureChart series={monthlySeries} />
+        </Box>
+
+        <ForecastScroller days={forecastDays} />
       </Box>
     </Box>
   );

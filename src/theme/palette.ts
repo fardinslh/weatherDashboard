@@ -134,7 +134,7 @@ export const lightPalette = {
     800: "#25262E",
     900: "#1C1B22",
   },
-  extra: { accent1: "#D3E1E7" },
+  extra: { accent1: "#D3E1E7", accent2: "#CDD9E0" },
 };
 
 export const darkPalette = {
@@ -177,5 +177,5 @@ export const darkPalette = {
     800: "#25262E",
     900: "#1C1B22",
   },
-  extra: { accent1: "#404961" },
+  extra: { accent1: "#404961", accent2: "#3F4861" },
 };
